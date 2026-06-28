@@ -1,6 +1,9 @@
 fastapi
 uvicorn
 sqlalchemy
-openpyxl
+psycopg2-binary
 pydantic
+openpyxl
 reportlab
+python-dotenv
+aiofiles

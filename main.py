@@ -25,7 +25,16 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Billing API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 INDEX_HTML = Path("templates/index.html")
 TEMPLATE_PATH = Path("template.xlsx")
