@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billing System</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7f4;
+      --panel: #ffffff;
+      --ink: #1e2520;
+      --muted: #667167;
+      --line: #dce3dc;
+      --accent: #176b5b;
+      --accent-dark: #105044;
+      --danger: #b3261e;
+      --soft: #eef6f3;
+      --warn-soft: #fff5f3;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    h1 {
+      font-size: 24px;
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      font-size: 18px;
+    }
+
+    .status {
+      min-height: 24px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .error {
+      color: var(--danger);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+
+    .tab-button {
+      border: 0;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 12px 14px 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover,
+    .tab-button.active {
+      background: transparent;
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: grid;
+      gap: 18px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+      font: inherit;
+    }
+
+    select,
+    select option,
+    .english-text {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      outline: 3px solid rgba(23, 107, 91, 0.15);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f0f4ef;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .compact-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      white-space: nowrap;
+    }
+
+    .item-total {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .duplicate-highlight {
+      animation: duplicateFlash 900ms ease-out;
+    }
+
+    @keyframes duplicateFlash {
+      0% {
+        background-color: rgba(23, 107, 91, 0.2);
+      }
+
+      100% {
+        background-color: transparent;
+      }
+    }
+
+    .actions,
+    .submit-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .submit-row {
+      justify-content: flex-end;
+    }
+
+    button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: #fff;
+      background: var(--accent);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .secondary {
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      background: var(--soft);
+    }
+
+    .secondary:hover {
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .danger {
+      border: 1px solid #efc6c2;
+      color: var(--danger);
+      background: var(--warn-soft);
+    }
+
+    .danger:hover {
+      color: #fff;
+      background: var(--danger);
+    }
+
+    .small-button {
+      min-height: 30px;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+
+    .totals {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .total-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfb;
+    }
+
+    .total-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .total-box strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    @media (max-width: 820px) {
+      header {
+        display: grid;
+        align-items: start;
+      }
+
+      .status {
+        text-align: left;
+      }
+
+      .grid,
+      .totals {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 14px;
+      }
+
+      .submit-row button,
+      .actions button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <h1>Billing System</h1>
+      <div class="status" id="status"></div>
+    </header>
+
+    <nav class="tabs" aria-label="Billing navigation">
+      <button type="button" class="tab-button active" data-tab="billingPanel">Billing</button>
+      <button type="button" class="tab-button" data-tab="customersPanel">Manage Customers</button>
+      <button type="button" class="tab-button" data-tab="productsPanel">Manage Products</button>
+      <button type="button" class="tab-button" data-tab="billHistoryPanel">Bill History</button>
+    </nav>
+
+    <div class="tab-panel active" id="billingPanel">
+      <form id="billForm">
+        <section>
+          <h2>Customer</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="customerType">Customer Type</label>
+              <select id="customerType" class="english-text" name="customerType">
+                <option value="New">New Customer</option>
+                <option value="Regular">Regular Customer</option>
+              </select>
+            </div>
+
+            <div class="field" id="newCustomerField">
+              <label for="newCustomerName">Customer Name</label>
+              <input id="newCustomerName" class="english-text" name="newCustomerName" type="text" autocomplete="name"
+                placeholder="Enter customer name" required>
+            </div>
+
+            <div class="field hidden" id="regularCustomerField">
+              <label for="regularCustomerName">Select Customer</label>
+              <select id="regularCustomerName" class="english-text" name="regularCustomerName">
+                <option value="">Select...</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel">
+            </div>
+
+            <div class="field">
+              <label for="location">Location</label>
+              <input id="location" name="location" type="text" autocomplete="street-address"
+                placeholder="Enter location">
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Items</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody"></tbody>
+            </table>
+          </div>
+          <div class="actions">
+            <button type="button" class="secondary" id="addItemBtn">Add Item</button>
+          </div>
+        </section>
+        <section>
+          <h2>Bill Details</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="packagingFee">Packaging Fee</label>
+              <input id="packagingFee" name="packagingFee" type="number" min="0" step="0.01" value="0" readonly>
+            </div>
+            <div class="field">
+              <label for="advancePaid">Advance Paid</label>
+              <input id="advancePaid" name="advancePaid" type="number" min="0" step="0.01" value="0">
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Totals</h2>
+          <div class="totals">
+            <div class="total-box">
+              <span>Subtotal</span>
+              <strong id="subtotalDisplay">0.00</strong>
+            </div>
+            <div class="total-box">
+              <span>Grand Total</span>
+              <strong id="grandTotalDisplay">0.00</strong>
+            </div>
+            <div class="total-box">
+              <span>Balance Due</span>
+              <strong id="balanceDueDisplay">0.00</strong>
+            </div>
+          </div>
+        </section>
+
+        <div class="submit-row">
+          <button type="submit" id="submitBtn">Generate &amp; Download Excel</button>
+          <button type="submit" id="submitPdfBtn" class="secondary">Generate &amp; Download PDF</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="tab-panel" id="customersPanel">
+      <section>
+        <h2>Add Customer</h2>
+        <form id="customerForm">
+          <div class="grid">
+            <div class="field">
+              <label for="customerNameInput">Name</label>
+              <input id="customerNameInput" type="text" required>
+            </div>
+            <div class="field">
+              <label for="customerPhoneInput">Phone</label>
+              <input id="customerPhoneInput" type="tel">
+            </div>
+            <div class="field">
+              <label for="customerLocationInput">Location</label>
+              <input id="customerLocationInput" type="text" placeholder="Enter location">
+            </div>
+            <div class="field">
+              <label for="customerTypeInput">Type</label>
+              <select id="customerTypeInput" class="english-text" required>
+                <option value="Regular">Regular Customer</option>
+                <option value="New">New Customer</option>
+              </select>
+            </div>
+          </div>
+          <div class="submit-row">
+            <button type="submit">Add Customer</button>
+          </div>
+        </form>
+      </section>
+
+      <section>
+        <h2>Customers</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="customersBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="tab-panel" id="productsPanel">
+      <section>
+        <h2>Add Product</h2>
+        <form id="productForm">
+          <div class="grid">
+            <div class="field">
+              <label for="productNameInput">Name</label>
+              <input id="productNameInput" class="tamil-text" type="text" placeholder="பொருள் பெயர்" required>
+            </div>
+            <div class="field">
+              <label for="productPriceInput">Default Price</label>
+              <input id="productPriceInput" type="number" min="0" step="0.01" required>
+            </div>
+          </div>
+          <div class="submit-row">
+            <button type="submit">Add Product</button>
+          </div>
+        </form>
+      </section>
+
+      <section>
+        <h2>Products</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Default Price</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="productsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="tab-panel" id="billHistoryPanel">
+      <section>
+        <h2>Bill History</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Bill ID</th>
+                <th>Date</th>
+                <th>Customer Name</th>
+                <th>Grand Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="billsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <template id="itemRowTemplate">
+    <tr>
+      <td>
+        <select class="product-select tamil-text" required>
+          <option value="">தேர்ந்தெடுக்கவும்...</option>
+        </select>
+      </td>
+      <td><input class="quantity" type="number" min="0" step="1" value="1" required></td>
+      <td><input class="price" type="number" min="0" step="1" value="0" required readonly></td>
+      <td class="item-total">0.00</td>
+      <td><button type="button" class="danger small-button remove-item" aria-label="Remove item">X</button></td>
+    </tr>
+  </template>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const statusBox = document.getElementById("status");
+      const tabButtons = document.querySelectorAll(".tab-button");
+      const tabPanels = document.querySelectorAll(".tab-panel");
+
+      const customerType = document.getElementById("customerType");
+      const newCustomerField = document.getElementById("newCustomerField");
+      const regularCustomerField = document.getElementById("regularCustomerField");
+      const newCustomerName = document.getElementById("newCustomerName");
+      const regularCustomerName = document.getElementById("regularCustomerName");
+      const phone = document.getElementById("phone");
+      const location = document.getElementById("location");
+      const packagingFee = document.getElementById("packagingFee");
+      const advancePaid = document.getElementById("advancePaid");
+      const itemsBody = document.getElementById("itemsBody");
+      const addItemBtn = document.getElementById("addItemBtn");
+      const billForm = document.getElementById("billForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const subtotalDisplay = document.getElementById("subtotalDisplay");
+      const grandTotalDisplay = document.getElementById("grandTotalDisplay");
+      const balanceDueDisplay = document.getElementById("balanceDueDisplay");
+
+      const customerForm = document.getElementById("customerForm");
+      const customerNameInput = document.getElementById("customerNameInput");
+      const customerPhoneInput = document.getElementById("customerPhoneInput");
+      const customerLocationInput = document.getElementById("customerLocationInput");
+      const customerTypeInput = document.getElementById("customerTypeInput");
+      const customersBody = document.getElementById("customersBody");
+
+      const productForm = document.getElementById("productForm");
+      const productNameInput = document.getElementById("productNameInput");
+      const productPriceInput = document.getElementById("productPriceInput");
+      const productsBody = document.getElementById("productsBody");
+      const billsBody = document.getElementById("billsBody");
+      const itemRowTemplate = document.getElementById("itemRowTemplate");
+
+      let customers = [];
+      let products = [];
+      let bills = [];
+      window.availableProducts = [];
+
+      function money(value) {
+        return Number(value || 0).toFixed(2);
+      }
+
+      function numberValue(input) {
+        return Number.parseFloat(input.value) || 0;
+      }
+
+      function setStatus(message, isError = false) {
+        statusBox.textContent = message;
+        statusBox.classList.toggle("error", isError);
+      }
+
+      async function apiRequest(url, options = {}) {
+        const response = await fetch(url, options);
+        if (response.status === 204) {
+          return null;
+        }
+        if (!response.ok) {
+          let message = "Request failed.";
+          try {
+            const error = await response.json();
+            message = error.detail || message;
+          } catch {
+          }
+          throw new Error(message);
+        }
+        return response.json();
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function resetSelect(selectElement, placeholder = "Select...") {
+        selectElement.innerHTML = "";
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = placeholder;
+        selectElement.appendChild(defaultOption);
+      }
+
+      function populateCustomerDropdown() {
+        resetSelect(regularCustomerName, "Select...");
+        customers
+          .filter((customer) => customer.customer_type === "Regular")
+          .forEach((customer) => {
+            const option = document.createElement("option");
+            option.value = customer.name;
+            option.textContent = customer.name;
+            option.className = "english-text";
+            regularCustomerName.appendChild(option);
+          });
+      }
+
+      function populateProductDropdown(selectElement) {
+        resetSelect(selectElement, "தேர்ந்தெடுக்கவும்...");
+        window.availableProducts.forEach((product) => {
+          const option = document.createElement("option");
+          option.value = String(product.id);
+          option.textContent = product.name;
+          option.dataset.price = String(product.default_price);
+          option.dataset.name = product.name;
+          option.classList.add("tamil-text");
+          selectElement.appendChild(option);
+        });
+      }
+
+      function resetItemRow(row) {
+        const productSelect = row.querySelector(".product-select");
+        const quantityInput = row.querySelector(".quantity");
+        const priceInput = row.querySelector(".price");
+        const itemTotal = row.querySelector(".item-total");
+
+        if (productSelect) {
+          productSelect.value = "";
+        }
+        if (quantityInput) {
+          quantityInput.value = "1";
+        }
+        if (priceInput) {
+          priceInput.value = "0";
+        }
+        if (itemTotal) {
+          itemTotal.textContent = "0.00";
+        }
+      }
+
+      function updateRowTotal(row) {
+        const quantity = numberValue(row.querySelector(".quantity"));
+        const price = numberValue(row.querySelector(".price"));
+        row.querySelector(".item-total").textContent = money(quantity * price);
+      }
+
+      function flashRow(row) {
+        row.classList.remove("duplicate-highlight");
+        void row.offsetWidth;
+        row.classList.add("duplicate-highlight");
+        window.setTimeout(() => row.classList.remove("duplicate-highlight"), 900);
+      }
+
+      function handleProductSelection(selectElement) {
+        const row = selectElement.closest("tr");
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const selectedProductId = selectElement.value;
+        const selectedProductName = selectedOption?.dataset?.name || selectedOption?.textContent || "";
+
+        if (!selectedProductId) {
+          resetItemRow(row);
+          updateTotals();
+          return;
+        }
+
+        const duplicateRow = Array.from(itemsBody.querySelectorAll("tr"))
+          .filter((otherRow) => otherRow !== row)
+          .find((otherRow) => {
+            const otherSelect = otherRow.querySelector(".product-select");
+            const otherOption = otherSelect?.options[otherSelect.selectedIndex];
+            const otherProductId = otherSelect?.value || "";
+            const otherProductName = otherOption?.dataset?.name || otherOption?.textContent || "";
+            return otherProductId === selectedProductId || otherProductName === selectedProductName;
+          });
+
+        if (duplicateRow) {
+          const duplicateQuantityInput = duplicateRow.querySelector(".quantity");
+          duplicateQuantityInput.value = String(numberValue(duplicateQuantityInput) + 1);
+          updateRowTotal(duplicateRow);
+          resetItemRow(row);
+          flashRow(duplicateRow);
+          updateTotals();
+          return;
+        }
+
+        const priceInput = row.querySelector(".price");
+        const quantityInput = row.querySelector(".quantity");
+        priceInput.value = selectedOption?.dataset?.price || "0";
+        if (!quantityInput.value || Number(quantityInput.value) <= 0) {
+          quantityInput.value = "1";
+        }
+        updateRowTotal(row);
+        updateTotals();
+      }
+
+      function attachProductChangeHandler(selectElement) {
+        if (selectElement.dataset.priceHandlerAttached === "1") {
+          return;
+        }
+        selectElement.addEventListener("change", () => handleProductSelection(selectElement));
+        selectElement.dataset.priceHandlerAttached = "1";
+      }
+
+      function refreshAllProductDropdowns() {
+        itemsBody.querySelectorAll(".product-select").forEach((selectElement) => {
+          const previousValue = selectElement.value;
+          populateProductDropdown(selectElement);
+          if (previousValue) {
+            selectElement.value = previousValue;
+          }
+          attachProductChangeHandler(selectElement);
+        });
+      }
+
+      function activateTab(panelId) {
+        tabButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.tab === panelId);
+        });
+        tabPanels.forEach((panel) => {
+          panel.classList.toggle("active", panel.id === panelId);
+        });
+
+        if (panelId === "customersPanel") {
+          loadCustomers();
+        }
+        if (panelId === "productsPanel") {
+          loadProducts();
+        }
+        if (panelId === "billHistoryPanel") {
+          loadBills();
+        }
+      }
+
+      function renderCustomers() {
+        customersBody.innerHTML = "";
+        customers.forEach((customer) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${escapeHtml(customer.name)}</td>
+            <td>${escapeHtml(customer.phone || "")}</td>
+            <td>${escapeHtml(customer.location || "")}</td>
+            <td>${escapeHtml(customer.customer_type)}</td>
+            <td>
+              <div class="compact-actions">
+                <button type="button" class="secondary small-button edit-customer" data-id="${customer.id}">Edit</button>
+                <button type="button" class="danger small-button delete-customer" data-id="${customer.id}">Delete</button>
+              </div>
+            </td>
+          `;
+          customersBody.appendChild(row);
+        });
+      }
+
+      function renderProducts() {
+        productsBody.innerHTML = "";
+        products.forEach((product) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="tamil-text">${escapeHtml(product.name)}</td>
+            <td>${money(product.default_price)}</td>
+            <td>
+              <div class="compact-actions">
+                <button type="button" class="secondary small-button edit-product" data-id="${product.id}">Edit</button>
+                <button type="button" class="danger small-button delete-product" data-id="${product.id}">Delete</button>
+              </div>
+            </td>
+          `;
+          productsBody.appendChild(row);
+        });
+      }
+
+      function renderBills() {
+        billsBody.innerHTML = "";
+        bills.forEach((bill) => {
+          const row = document.createElement("tr");
+          const dateText = bill.created_at ? new Date(bill.created_at).toLocaleDateString("en-GB") : "";
+          row.innerHTML = `
+            <td>${escapeHtml(bill.bill_id)}</td>
+            <td>${escapeHtml(dateText)}</td>
+            <td>${escapeHtml(bill.customer_name || "")}</td>
+            <td>${money(bill.grand_total)}</td>
+            <td>
+              <div class="compact-actions">
+                <button type="button" class="secondary small-button download-bill" data-bill-id="${escapeHtml(bill.bill_id)}" data-format="excel">Excel</button>
+                <button type="button" class="secondary small-button download-bill" data-bill-id="${escapeHtml(bill.bill_id)}" data-format="pdf">PDF</button>
+              </div>
+            </td>
+          `;
+          billsBody.appendChild(row);
+        });
+      }
+
+      async function loadDropdownData() {
+        const [customersResponse, productsResponse] = await Promise.all([
+          fetch("/api/customers"),
+          fetch("/api/products"),
+        ]);
+
+        if (!customersResponse.ok) {
+          throw new Error("Failed to load customers.");
+        }
+        if (!productsResponse.ok) {
+          throw new Error("Failed to load products.");
+        }
+
+        const customerData = await customersResponse.json();
+        const productData = await productsResponse.json();
+
+        console.log("Customers API data:", customerData);
+        console.log("Products API data:", productData);
+
+        customers = Array.isArray(customerData) ? customerData : [];
+        products = Array.isArray(productData) ? productData : [];
+        window.availableProducts = [...products];
+
+        populateCustomerDropdown();
+        refreshAllProductDropdowns();
+      }
+
+      async function loadCustomers() {
+        try {
+          customers = await apiRequest("/api/customers");
+          renderCustomers();
+          populateCustomerDropdown();
+          if (customerType.value === "Regular") {
+            syncRegularCustomerDetails();
+          }
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      }
+
+      async function loadBills() {
+        try {
+          bills = await apiRequest("/api/bills");
+          renderBills();
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      }
+
+      async function loadProducts() {
+        try {
+          products = await apiRequest("/api/products");
+          window.availableProducts = [...products];
+          renderProducts();
+          refreshAllProductDropdowns();
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      }
+
+      function createItemRow() {
+        const row = itemRowTemplate.content.firstElementChild.cloneNode(true);
+        const productSelect = row.querySelector(".product-select");
+        populateProductDropdown(productSelect);
+        attachProductChangeHandler(productSelect);
+        itemsBody.appendChild(row);
+        resetItemRow(row);
+        updateTotals();
+      }
+
+      function updateTotals() {
+        let subtotal = 0;
+        itemsBody.querySelectorAll("tr").forEach((row) => {
+          const quantity = numberValue(row.querySelector(".quantity"));
+          const price = numberValue(row.querySelector(".price"));
+          const total = quantity * price;
+          row.querySelector(".item-total").textContent = money(total);
+          subtotal += total;
+        });
+
+        const packagingAmount = subtotal * 0.1;
+        packagingFee.value = money(packagingAmount);
+
+        const grandTotal = subtotal + packagingAmount;
+        const balanceDue = grandTotal - numberValue(advancePaid);
+
+        subtotalDisplay.textContent = money(subtotal);
+        grandTotalDisplay.textContent = money(grandTotal);
+        balanceDueDisplay.textContent = money(balanceDue);
+      }
+
+      function toggleCustomerMode() {
+        const isRegular = customerType.value === "Regular";
+        newCustomerField.classList.toggle("hidden", isRegular);
+        regularCustomerField.classList.toggle("hidden", !isRegular);
+        newCustomerName.required = !isRegular;
+        regularCustomerName.required = isRegular;
+        phone.disabled = isRegular;
+        location.disabled = isRegular;
+
+        if (isRegular) {
+          syncRegularCustomerDetails();
+        } else {
+          phone.value = "";
+          location.value = "";
+        }
+      }
+
+      function syncRegularCustomerDetails() {
+        const customer = selectedRegularCustomer();
+        phone.value = customer?.phone || "";
+        location.value = customer?.location || "";
+      }
+
+      function selectedRegularCustomer() {
+        return customers.find((customer) => customer.name === regularCustomerName.value);
+      }
+
+      function collectItems() {
+        const items = [];
+        const rows = itemsBody.querySelectorAll("tr");
+
+        // Strict row-by-row DOM traversal with index tracking
+        for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+          const row = rows[rowIndex];
+
+          // Get all required inputs for this row
+          const productSelect = row.querySelector(".product-select");
+          const quantityInput = row.querySelector(".quantity");
+          const priceInput = row.querySelector(".price");
+          const itemTotalCell = row.querySelector(".item-total");
+
+          if (!productSelect || !quantityInput || !priceInput) {
+            console.warn(`Row ${rowIndex}: Missing input elements`, row);
+            continue;
+          }
+
+          // Strict type coercion with fallback defaults
+          const selectedOption = productSelect.options[productSelect.selectedIndex];
+          const productName = (selectedOption?.dataset?.name || selectedOption?.textContent || "").trim();
+          const quantity = parseFloat(quantityInput.value) || 0;
+          const price = parseFloat(priceInput.value) || 0;
+          const total = quantity * price;
+
+          // Validate extracted data
+          if (!productName) {
+            console.warn(`Row ${rowIndex}: Missing product name`);
+            continue;
+          }
+          if (quantity <= 0) {
+            console.warn(`Row ${rowIndex}: Invalid quantity`, quantity);
+            continue;
+          }
+          if (price < 0) {
+            console.warn(`Row ${rowIndex}: Invalid price`, price);
+            continue;
+          }
+
+          items.push({
+            product_name: productName,
+            quantity: quantity,
+            price: price,
+            total: total,
+          });
+
+          console.log(`Row ${rowIndex}: Collected item`, {
+            product_name: productName,
+            quantity,
+            price,
+            total,
+          });
+        }
+
+        return items;
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      tabButtons.forEach((button) => {
+        button.addEventListener("click", () => activateTab(button.dataset.tab));
+      });
+
+      customerType.addEventListener("change", toggleCustomerMode);
+      regularCustomerName.addEventListener("change", syncRegularCustomerDetails);
+      addItemBtn.addEventListener("click", createItemRow);
+      advancePaid.addEventListener("input", updateTotals);
+
+      itemsBody.addEventListener("input", (event) => {
+        if (event.target.classList.contains("quantity") || event.target.classList.contains("price")) {
+          const row = event.target.closest("tr");
+          if (row) {
+            updateRowTotal(row);
+          }
+          updateTotals();
+        }
+      });
+
+      itemsBody.addEventListener("click", (event) => {
+        if (!event.target.classList.contains("remove-item")) {
+          return;
+        }
+
+        if (itemsBody.rows.length === 1) {
+          const row = itemsBody.querySelector("tr");
+          resetItemRow(row);
+        } else {
+          event.target.closest("tr").remove();
+        }
+        updateTotals();
+      });
+
+      customerForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const payload = {
+          name: customerNameInput.value.trim(),
+          phone: customerPhoneInput.value.trim() || null,
+          location: customerLocationInput.value.trim() || null,
+          customer_type: customerTypeInput.value,
+        };
+
+        try {
+          await apiRequest("/api/customers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          customerForm.reset();
+          customerTypeInput.value = "Regular";
+          await loadCustomers();
+          setStatus("Customer added.");
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      });
+
+      customersBody.addEventListener("click", async (event) => {
+        const id = Number(event.target.dataset.id);
+        if (!id) {
+          return;
+        }
+
+        const customer = customers.find((item) => item.id === id);
+        if (!customer) {
+          return;
+        }
+
+        try {
+          if (event.target.classList.contains("edit-customer")) {
+            const name = prompt("Customer name", customer.name);
+            if (name === null) {
+              return;
+            }
+            const phoneValue = prompt("Phone", customer.phone || "");
+            if (phoneValue === null) {
+              return;
+            }
+            const locationValue = prompt("Location", customer.location || "");
+            if (locationValue === null) {
+              return;
+            }
+            const type = prompt("Type", customer.customer_type);
+            if (type === null) {
+              return;
+            }
+
+            await apiRequest(`/api/customers/${id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: name.trim(),
+                phone: phoneValue.trim() || null,
+                location: locationValue.trim() || null,
+                customer_type: type.trim(),
+              }),
+            });
+            await loadCustomers();
+            setStatus("Customer updated.");
+          }
+
+          if (event.target.classList.contains("delete-customer")) {
+            if (!confirm(`Delete customer "${customer.name}"?`)) {
+              return;
+            }
+            await apiRequest(`/api/customers/${id}`, { method: "DELETE" });
+            await loadCustomers();
+            setStatus("Customer deleted.");
+          }
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      });
+
+      productForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const payload = {
+          name: productNameInput.value.trim(),
+          default_price: numberValue(productPriceInput),
+        };
+
+        try {
+          await apiRequest("/api/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          productForm.reset();
+          await loadProducts();
+          setStatus("Product added.");
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      });
+
+      productsBody.addEventListener("click", async (event) => {
+        const id = Number(event.target.dataset.id);
+        if (!id) {
+          return;
+        }
+
+        const product = products.find((item) => item.id === id);
+        if (!product) {
+          return;
+        }
+
+        try {
+          if (event.target.classList.contains("edit-product")) {
+            const name = prompt("Product name", product.name);
+            if (name === null) {
+              return;
+            }
+            const price = prompt("Default price", product.default_price);
+            if (price === null) {
+              return;
+            }
+
+            await apiRequest(`/api/products/${id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: name.trim(),
+                default_price: Number.parseFloat(price) || 0,
+              }),
+            });
+            await loadProducts();
+            setStatus("Product updated.");
+          }
+
+          if (event.target.classList.contains("delete-product")) {
+            if (!confirm(`Delete product "${product.name}"?`)) {
+              return;
+            }
+            await apiRequest(`/api/products/${id}`, { method: "DELETE" });
+            await loadProducts();
+            setStatus("Product deleted.");
+          }
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      });
+
+      billsBody.addEventListener("click", (event) => {
+        const billId = event.target.dataset.billId;
+        if (!billId || !event.target.classList.contains("download-bill")) {
+          return;
+        }
+        const format = event.target.dataset.format || "excel";
+        window.location.href = `/api/bills/${encodeURIComponent(billId)}/download?format=${format}`;
+      });
+
+      billForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setStatus("");
+
+        const submitterId = event.submitter ? event.submitter.id : "submitBtn";
+        const isPdf = submitterId === "submitPdfBtn";
+        const submitBtnUsed = event.submitter || submitBtn;
+
+        const isRegular = customerType.value === "Regular";
+        const customer = isRegular ? selectedRegularCustomer() : null;
+        const customerName = isRegular ? regularCustomerName.value.trim() : newCustomerName.value.trim();
+
+        if (isRegular && !customer) {
+          setStatus("Select a regular customer from the list.", true);
+          return;
+        }
+
+        const items = collectItems();
+        if (items.length === 0) {
+          setStatus("Add at least one item to the bill.", true);
+          return;
+        }
+
+        // Strict validation of each item
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (!item.product_name || item.product_name.trim() === "") {
+            setStatus(`Item ${i + 1}: Product name is required.`, true);
+            return;
+          }
+          if (item.quantity <= 0 || !Number.isFinite(item.quantity)) {
+            setStatus(`Item ${i + 1}: Quantity must be greater than 0.`, true);
+            return;
+          }
+          if (item.price < 0 || !Number.isFinite(item.price)) {
+            setStatus(`Item ${i + 1}: Price must be non-negative.`, true);
+            return;
+          }
+          if (item.total < 0 || !Number.isFinite(item.total)) {
+            setStatus(`Item ${i + 1}: Total calculation invalid (qty × price).`, true);
+            return;
+          }
+        }
+
+        const payload = {
+          customer_name: customerName,
+          customer_type: customerType.value,
+          location: isRegular ? customer.location : location.value.trim() || null,
+          packaging_fee: parseFloat(packagingFee.value) || 0,
+          advance_paid: parseFloat(advancePaid.value) || 0,
+          items: items,
+        };
+
+        console.log("Payload being sent:", payload);
+
+        try {
+          submitBtnUsed.disabled = true;
+          setStatus("Generating bill...");
+          console.table(payload.items);
+          const endpoint = isPdf ? "/api/generate-pdf-bill" : "/api/generate-bill";
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            let message = "Could not generate bill.";
+            try {
+              const error = await response.json();
+              message = error.detail || message;
+            } catch {
+            }
+            throw new Error(message);
+          }
+
+          const blob = await response.blob();
+          const disposition = response.headers.get("Content-Disposition") || "";
+          const match = disposition.match(/filename="?([^"]+)"?/);
+          const defaultExt = isPdf ? "pdf" : "xlsx";
+          const filename = match ? match[1] : `bill.${defaultExt}`;
+          downloadBlob(blob, filename);
+          setStatus("Bill downloaded.");
+        } catch (error) {
+          setStatus(error.message, true);
+        } finally {
+          submitBtnUsed.disabled = false;
+        }
+      });
+
+      createItemRow();
+      try {
+        await loadDropdownData();
+        renderCustomers();
+        renderProducts();
+        renderBills();
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+      toggleCustomerMode();
+    });
+  </script>
+</body>
+
+</html>

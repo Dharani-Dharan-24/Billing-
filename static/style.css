@@ -1,0 +1,9 @@
+@font-face {
+  font-family: "JF Kamban";
+  src: url("/static/fonts/jf-kamban.ttf") format("truetype");
+  font-display: swap;
+}
+
+.tamil-text {
+  font-family: "JF Kamban", sans-serif;
+}
