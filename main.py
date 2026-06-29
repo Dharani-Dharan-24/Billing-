@@ -541,14 +541,17 @@ def delete_product(product_id: int, db: Session = Depends(get_db)) -> Response:
 
 def generate_pdf_bill(payload: dict) -> BytesIO:
     stream = BytesIO()
-    doc = SimpleDocTemplate(stream, pagesize=A4)
+    doc = SimpleDocTemplate(stream, pagesize=A4, topMargin=170, leftMargin=45, rightMargin=45, bottomMargin=50)
     elements = []
     
     data = []
-    date_str = f"Date: {payload.get('bill_date', datetime.now()).strftime('%d-%m-%Y')}"
+    date_str = f"{payload.get('bill_date', datetime.now()).strftime('%d-%m-%Y')}"
     data.append(["", "", "", "", date_str])
+    data.append(["", "", "", "", ""])
+    data.append(["", "", "", "", ""])
     data.append([f"To, {payload.get('customer_name', '')}", "", "", "", ""])
     data.append([f"{payload.get('location', '') or ''}", "", "", "", ""])
+    data.append(["", "", "", "", ""])
     data.append(["Sl.No", "ITEM NAME", "QTY", "Rate/unit", "Total"])
     
     for idx, item in enumerate(payload.get('items', [])):
@@ -565,7 +568,7 @@ def generate_pdf_bill(payload: dict) -> BytesIO:
     data.append(["", "Advance", "", "", f"{payload.get('advance_paid', 0):.2f}"])
     data.append(["", "Balance Amount", "", "", f"{payload.get('balance_due', 0):.2f}"])
     
-    header_idx = 3
+    header_idx = 6
     last_item_idx = header_idx + len(payload.get('items', []))
     
     style = TableStyle([
